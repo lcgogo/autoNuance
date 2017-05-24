@@ -6,8 +6,8 @@
 # The script covers followed 2 sections in Nuance+Speech+Suite+10.5+Installation+with+Tropo+Runtime+progress.doc
 # Change the NMS port from 8080 to 8081 & Config and Startup Nuance Services by Command Line Interface (CLI)
 # https://voxeolabs.atlassian.net/wiki/display/CS/Nuance+Speech+Suite+10.5+Installation+with+Tropo+Runtime+progress
-# 
-# Author: Lewis Li 
+#
+# Author: Lewis Li
 # Email: chali2@cisco.com
 # Phone: +86 13911983435
 # 2016.Nov.28th Ver 1.0  New script.
@@ -17,6 +17,7 @@
 # 2016.Dec.13th Ver 1.3 Change the check cmd Result of Nuance configuration. Add Sys_dt function.
 # 2017.Apr.28th Ver 1.4 Add function ResultPrint
 # 2017.May.16th Ver 2.0 Change port 8081 to a variable as Ver 2.0
+# 2017.May.24th Ver 2.1 Add a check for tropoIsInstalled
 # Plan:
 # 1. add a nuance license check
 # 2. add a voice package rpm check
@@ -98,7 +99,7 @@ fi
 #################################################
 # function ReplaceSpecialString
 # $1 is the full path file name
-# $2 is the keyword of the line whhich contains the string you want to replace 
+# $2 is the keyword of the line whhich contains the string you want to replace
 # $3 is the string you want to replace from
 # $4 is the string you want to replace to
 function ReplaceSpecialString(){
@@ -142,16 +143,20 @@ echo [`Sys_dt`] Check the Tropo runtime is stopped.
 which tropo_services
 if [ $? -eq 1 ];then
   echo [`Sys_dt`] Tropo is not installed. Continue install Nuance.
-  else
-  if [ `tropo_services status | grep running | wc -l` -ne 0 ];then
-    echo [`Sys_dt`] Tropo is running. Stop it now.
-    tropo_services stop
-    sleep 30s
-    tropoIsStop=yes
-    else
-      echo [`Sys_dt`] Tropo is not running. Continue install Nuance.
-    tropoIsStop=yes
-  fi
+  tropoIsInstalled=no
+  elif [ $? -eq 0 ];then
+    tropoIsInstalled=yes
+    if [ `tropo_services status | grep running | wc -l` -ne 0 ];then
+      echo [`Sys_dt`] Tropo is running. Stop it now.
+      tropo_services stop
+      sleep 30s
+      tropoIsStop=yes
+      else
+        echo [`Sys_dt`] Tropo is not running. Continue install Nuance.
+      tropoIsStop=yes
+    fi
+  elInstalled   echo [`Sys_dt`] Unknown result of \"which tropo_services\". Exit now.
+    exit 1
 fi
 
 echo [`Sys_dt`] Check the Nuance Speech Suite is installed.
@@ -308,7 +313,7 @@ fi
 # Complete
 echo [`Sys_dt`] The Nuance is installed successful.
 
-if [ $tropoIsStop = yes ];then
+if [[ $tropoIsInstalled = yes && $tropoIsStop = yes ]];then
   echo [`Sys_dt`] Start tropo_services now. Please check the result.
   tropo_services start
 fi
