@@ -17,7 +17,8 @@
 # 2016.Dec.13th Ver 1.3 Change the check cmd Result of Nuance configuration. Add Sys_dt function.
 # 2017.Apr.28th Ver 1.4 Add function ResultPrint
 # 2017.May.16th Ver 2.0 Change port 8081 to a variable as Ver 2.0
-# 2017.May.24th Ver 2.1 Add a check for tropoIsInstalled
+# 2017.May.24th Ver 2.1 Add a check for tropoIsInstalled, rewrite the logic of `which tropo_services`
+# 2017.May.25th Ver 2.2 Add a printout : echo [`Sys_dt`] Tropo is installed. Need stop it before Nuance deploy.
 # Plan:
 # 1. add a nuance license check
 # 2. add a voice package rpm check
@@ -73,7 +74,7 @@ case $choice in
 #       fi
 
   ;;
-  *) echo Invalid input. Please input Y or N. Your input is $choice. Exit now.
+  *) echo [`Sys_dt`] Invalid input. Please input Y or N. Your input is $choice. Exit now.
     exit 1
   ;;
 esac
@@ -92,7 +93,7 @@ serviceStopResult=`ps -ef | grep -w $serviceCheckName | grep -v grep | wc -l` # 
 # echo serviceStopResult = $serviceStopResult
 
 if [ $serviceStopResult -ne 0 ];then
-  echo $serviceName is not stopped. Manual check by "ps -ef | grep -w $serviceCheckName" and stop it by kill.
+  echo [`Sys_dt`] $serviceName is not stopped. Manual check by "ps -ef | grep -w $serviceCheckName" and stop it by kill.
 fi
 }
 
@@ -139,26 +140,29 @@ fi
 echo "##############################################################"
 echo "# 1. Change the NMS port from 8080 to $nuancePort"
 echo "##############################################################"
-echo [`Sys_dt`] Check the Tropo runtime is stopped.
+echo [`Sys_dt`] Check the Tropo services are stopped.
 which tropo_services
-if [ $? -eq 1 ];then
-  echo [`Sys_dt`] Tropo is not installed. Continue deploy Nuance.
-  tropoIsInstalled=no
-  elif [ $? -eq 0 ];then
-    tropoIsInstalled=yes
-    echo [`Sys_dt`] Tropo is installed. Need stop it before Nuance deploy.
-    if [ `tropo_services status | grep running | wc -l` -ne 0 ];then
-      echo [`Sys_dt`] Tropo is running. Stop it now.
-      tropo_services stop
-      sleep 30s
-      tropoIsStop=yes
-      else
-        echo [`Sys_dt`] Tropo is not running. Continue deploy Nuance.
-        tropoIsStop=yes
-    fi
-      echo [`Sys_dt`] Unknown result of \"which tropo_services\". Exit now.
-    exit 1
-fi
+
+case $? in
+  0) tropoIsInstalled=yes
+     echo [`Sys_dt`] Tropo is installed. Need stop it before Nuance deploy.
+     if [ `tropo_services status | grep running | wc -l` -ne 0 ];then
+       echo [`Sys_dt`] Tropo is running. Stop it now.
+       tropo_services stop
+       sleep 30s
+       tropoIsStop=yes
+     else
+       echo [`Sys_dt`] Tropo is not running. Continue deploy Nuance.
+       tropoIsStop=yes
+     fi
+  ;;
+  1) tropoIsInstalled=no
+     echo [`Sys_dt`] Tropo is not installed. Continue deploy Nuance.
+  ;;
+  *) echo [`Sys_dt`] Unknown result of \"which tropo_services\". Exit now.
+     exit 1
+  ;;
+esac
 
 echo [`Sys_dt`] Check the Nuance Speech Suite is installed.
 if [ ! -e /etc/init.d/nuance-wd ];then
