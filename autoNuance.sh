@@ -140,6 +140,8 @@ fi
 echo "##############################################################"
 echo "# 1. Change the NMS port from 8080 to $nuancePort"
 echo "##############################################################"
+
+# Stop Tropo services if any
 echo [`Sys_dt`] Check the Tropo services are stopped.
 which tropo_services
 
