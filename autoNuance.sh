@@ -23,6 +23,11 @@
 # 2. add a voice package rpm check
 # 3. add a remove t_hosts step from mysql if assign-role.sh fail with duplicated host name
 
+###############################################
+# Global variables
+thishost=`hostname -f`
+nuancePort=8081
+
 echo "##############################################"
 echo "# The script is used to deploy Nuance 10.5.3 with Tropo runtime."
 echo "# The Nuance Speech Suite setup.sh must be completed and Nuance voices are installed."
@@ -32,11 +37,6 @@ echo "# The script has 2 parts:"
 echo "# 1. Change the Nuance Management Station tomcat working web port from 8080 to $nuancePort"
 echo "# 2. Config and Startup Nuance Services by Command Line Interface (CLI)"
 echo "##############################################"
-
-###############################################
-# Global variables
-thishost=`hostname -f`
-nuancePort=8081
 
 ###############################################
 # function Sys_dt
@@ -142,20 +142,21 @@ echo "##############################################################"
 echo [`Sys_dt`] Check the Tropo runtime is stopped.
 which tropo_services
 if [ $? -eq 1 ];then
-  echo [`Sys_dt`] Tropo is not installed. Continue install Nuance.
+  echo [`Sys_dt`] Tropo is not installed. Continue deploy Nuance.
   tropoIsInstalled=no
   elif [ $? -eq 0 ];then
     tropoIsInstalled=yes
+    echo [`Sys_dt`] Tropo is installed. Need stop it before Nuance deploy.
     if [ `tropo_services status | grep running | wc -l` -ne 0 ];then
       echo [`Sys_dt`] Tropo is running. Stop it now.
       tropo_services stop
       sleep 30s
       tropoIsStop=yes
       else
-        echo [`Sys_dt`] Tropo is not running. Continue install Nuance.
-      tropoIsStop=yes
+        echo [`Sys_dt`] Tropo is not running. Continue deploy Nuance.
+        tropoIsStop=yes
     fi
-  elInstalled   echo [`Sys_dt`] Unknown result of \"which tropo_services\". Exit now.
+      echo [`Sys_dt`] Unknown result of \"which tropo_services\". Exit now.
     exit 1
 fi
 
