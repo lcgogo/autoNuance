@@ -166,6 +166,7 @@ case $? in
   ;;
 esac
 
+# Check whether Nuance Speech Suite is installed
 echo [`Sys_dt`] Check the Nuance Speech Suite is installed.
 if [ ! -e /etc/init.d/nuance-wd ];then
   echo Nuance watch daemeon file is not existed. The Nuance is not installed. Exit now.
