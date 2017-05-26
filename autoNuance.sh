@@ -15,9 +15,9 @@
 # 2016.Dec.2rd  Ver 1.2  Add a step to read tts_port from user input and set the tts_port for NVE.
 # 2016.Dec.9th  Ver 1.2.1 Add more comments and printout.
 # 2016.Dec.13th Ver 1.3 Change the check cmd Result of Nuance configuration. Add Sys_dt function.
-# 2017.Apr.28th Ver 1.4 Add function ResultPrint
+# 2017.Apr.28th Ver 1.4 Add function ResultPrint.
 # 2017.May.16th Ver 2.0 Change port 8081 to a variable as Ver 2.0
-# 2017.May.24th Ver 2.1 Add a check for tropoIsInstalled, rewrite the logic of `which tropo_services`
+# 2017.May.24th Ver 2.1 Add a check for tropoIsInstalled, rewrite the logic hwo to do after `which tropo_services`
 # 2017.May.25th Ver 2.2 Add a printout : echo [`Sys_dt`] Tropo is installed. Need stop it before Nuance deploy.
 # Plan:
 # 1. add a nuance license check
@@ -317,12 +317,14 @@ if [ $? -ne 0 ];then
   exit 3
 fi
 
-##############################################################
-# Complete
-echo [`Sys_dt`] The Nuance is installed successful.
-
-if [[ $tropoIsInstalled = yes && $tropoIsStop = yes ]];then
+# Start Tropo services or not
+if [[ $tropoIsInstalled = yes && $tropoIsStop = yes && $nuancePort -ne 8080 ]];then
   echo [`Sys_dt`] Start tropo_services now. Please check the result.
   tropo_services start
 fi
+
+##############################################################
+# Complete
+echo -e [`Sys_dt`] "\033[32;49;1m The Nuance is configed and deployed successful. \033[39;49;0m"
+
 exit 0
