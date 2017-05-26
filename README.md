@@ -1,2 +1,2 @@
 # autoNuance
-an auto install script to install Nuance all-in-one server
+An script to deploy Nuance all-in-one server automatically.
