@@ -19,10 +19,15 @@
 # 2017.May.16th Ver 2.0 Change port 8081 to a variable as Ver 2.0
 # 2017.May.24th Ver 2.1 Add a check for tropoIsInstalled, rewrite the logic hwo to do after `which tropo_services`
 # 2017.May.25th Ver 2.2 Add a printout : echo [`Sys_dt`] Tropo is installed. Need stop it before Nuance deploy.
+# 2017.May.26th Ver 2.3 Add a check for super user running.
 # Plan:
 # 1. add a nuance license check
 # 2. add a voice package rpm check
 # 3. add a remove t_hosts step from mysql if assign-role.sh fail with duplicated host name
+
+#############
+# Preparing #
+#############
 
 ###############################################
 # Global variables
@@ -44,6 +49,15 @@ echo "##############################################"
 function Sys_dt(){
 echo `date +%Y-%m-%d-%H:%M:%S`
 }
+
+##############################################
+# Are you a super user?
+if [ "`id -u`" != "0" ]; then
+  echo [`Sys_dt`] "You must be a superuser to run this script."
+  exit 1
+  else
+    echo [`Sys_dt`] "Running as superuser"
+fi
 
 ###############################################
 # Is this a test Nuance host?
