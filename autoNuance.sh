@@ -20,10 +20,18 @@
 # 2017.May.24th Ver 2.1 Add a check for tropoIsInstalled, rewrite the logic hwo to do after `which tropo_services`
 # 2017.May.25th Ver 2.2 Add a printout : echo [`Sys_dt`] Tropo is installed. Need stop it before Nuance deploy.
 # 2017.May.26th Ver 2.3 Add a check for super user running.
+# 2017.May.26th Ver 2.4 Add a memory check, must larger than 1.5G. And replan the exit error code.
 # Plan:
 # 1. add a nuance license check
 # 2. add a voice package rpm check
 # 3. add a remove t_hosts step from mysql if assign-role.sh fail with duplicated host name
+
+# Exit error code
+# 0 Run this script completed.
+# 1 Exit without any modify to file or system.
+# 2 File changes failed
+# 3 Command failed
+
 
 #############
 # Preparing #
@@ -53,10 +61,18 @@ echo `date +%Y-%m-%d-%H:%M:%S`
 ##############################################
 # Are you a super user?
 if [ "`id -u`" != "0" ]; then
-  echo [`Sys_dt`] "You must be a superuser to run this script."
+  echo [`Sys_dt`] You must be a superuser to run this script.
   exit 1
   else
-    echo [`Sys_dt`] "Running as superuser"
+    echo [`Sys_dt`] Running as superuser.
+fi
+
+#############################################
+# Memory must be larger than 1.5G, otherwise NMS can't stop/start
+if [ `free -m | grep Mem | awk '{print $2}'` -lt 1500  ]; then
+  echo [`Sys_dt`] "The NMS can't stop/start at this host because the memory is less than 1.5G." 
+  echo [`Sys_dt`] "Pls increase memory larger than 1.5G  and run this script again."
+  exit 1
 fi
 
 ###############################################
@@ -76,7 +92,7 @@ case $choice in
      read tts_port
 #       if [[ $tts_port -gt 100 ]];then
 #         echo The NVE TTS port is larger than 100. Need install Nuance in a seperated host. Exit now.
-#         exit 5
+#         exit 1
 #       fi
 
      echo [`Sys_dt`] This is not a test Nuance host. Input the ASR port number in license.lic
@@ -84,7 +100,7 @@ case $choice in
      read asr_port
 #       if [[ $asr_port -gt 100 ]];then
 #         echo The NRS ASR port is larger than 100. Need install Nuance in a seperated host. Exit now.
-#         exit 5
+#         exit 1
 #       fi
 
   ;;
@@ -120,7 +136,7 @@ fi
 function ReplaceSpecialString(){
 if [ ! -f $1 ];then
   echo [`Sys_dt`] $1 does not exist. Pls check Nuance is installed correctly. Exit now.
-  exit 1
+  exit 2
 fi
 #backup
 cp $1 $1.`Sys_dt`
@@ -144,7 +160,7 @@ if [ "$cmdResultTitle" = "Successful" ];then
     echo [`Sys_dt`] The command is not successful executed. Check the printout. Exit now.
     echo [`Sys_dt`] The command printout is below:
     echo [`Sys_dt`] $cmdResult
-    exit 4
+    exit 3
 fi
 }
 
@@ -184,7 +200,7 @@ esac
 echo [`Sys_dt`] Check the Nuance Speech Suite is installed.
 if [ ! -e /etc/init.d/nuance-wd ];then
   echo Nuance watch daemeon file is not existed. The Nuance is not installed. Exit now.
-exit 5
+exit 1
 fi
 
 # Stop Nuance service
