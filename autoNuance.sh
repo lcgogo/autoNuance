@@ -21,10 +21,11 @@
 # 2017.May.25th Ver 2.2 Add a printout : echo [`Sys_dt`] Tropo is installed. Need stop it before Nuance deploy.
 # 2017.May.26th Ver 2.3 Add a check for super user running.
 # 2017.May.26th Ver 2.4 Add a memory check, must larger than 1.5G. And replan the exit error code.
+# 2017.May.31th Ver 2.5 Add a voice package rpm check
 # Plan:
 # 1. add a nuance license check
-# 2. add a voice package rpm check
-# 3. add a remove t_hosts step from mysql if assign-role.sh fail with duplicated host name
+# 2. add a remove t_hosts  step from mysql if assign-role.sh fail with duplicated host name
+# 3. add a step to check hostname, it can't be localhost
 
 # Exit error code
 # 0 Run this script completed.
@@ -57,21 +58,37 @@ echo "##############################################"
 function Sys_dt(){
 echo `date +%Y-%m-%d-%H:%M:%S`
 }
+###############################################
 
-##############################################
 # Are you a super user?
 if [ "`id -u`" != "0" ]; then
-  echo [`Sys_dt`] You must be a superuser to run this script.
+  echo [`Sys_dt`] You must be a superuser to run this script. Exit now.
   exit 1
   else
     echo [`Sys_dt`] Running as superuser.
 fi
 
-#############################################
 # Memory must be larger than 1.5G, otherwise NMS can't stop/start
 if [ `free -m | grep Mem | awk '{print $2}'` -lt 1500  ]; then
   echo [`Sys_dt`] "The NMS can't stop/start at this host because the memory is less than 1.5G." 
-  echo [`Sys_dt`] "Pls increase memory larger than 1.5G  and run this script again."
+  echo [`Sys_dt`] "Pls increase memory larger than 1.5GB and run this script again. Exit now."
+  exit 1
+fi
+
+# Check whether Nuance Speech Suite is installed
+echo [`Sys_dt`] Check the Nuance Speech Suite is installed.
+if [ ! -e /etc/init.d/nuance-wd ];then
+  echo Nuance watch daemeon file is not existed. The Nuance is not installed. Exit now.
+  exit 1
+fi
+
+# NRE & NVE Voice packages must be installed. Otherwise the config will meet Fatal Error.
+if [ `rpm -qa | grep -i nve | wc -l` -lt 2 ];then
+  echo [`Sys_dt`] The NVE voice package is not installed. Pls install at least one at first. Exit now.
+  exit 1
+fi
+if [ `rpm -qa | grep -i nre | wc -l` -lt 2 ];then
+  echo [`Sys_dt`] The NRE voice package is not installed. Pls install at least one at first. Exit now.
   exit 1
 fi
 
@@ -82,7 +99,7 @@ echo -en "Is this a test Nuance host [Y/N]: "
 read choice
 
 case $choice in
-  Y|y) testflag=yes
+  Y|y) testflag=yes -
      echo [`Sys_dt`] This is a test Nuance host. The test license will be restricted to 4 ports.
   ;;
   N|n) testflag=no
@@ -195,13 +212,6 @@ case $? in
      exit 1
   ;;
 esac
-
-# Check whether Nuance Speech Suite is installed
-echo [`Sys_dt`] Check the Nuance Speech Suite is installed.
-if [ ! -e /etc/init.d/nuance-wd ];then
-  echo Nuance watch daemeon file is not existed. The Nuance is not installed. Exit now.
-exit 1
-fi
 
 # Stop Nuance service
 echo [`Sys_dt`] Stop services: initScriptmserver.sh initScriptmserverdc.sh initScriptmserversa.sh "&" nuance-wd.
