@@ -365,6 +365,6 @@ fi
 
 ##############################################################
 # Complete
-echo -e [`Sys_dt`] "\033[32;49;1m The Nuance is configed and deployed successful. \033[39;49;0m"
+echo -e [`Sys_dt`] "\033[32;49;1m The Nuance Speech Suite is configured and deployed in this host. \033[39;49;0m"
 
 exit 0
