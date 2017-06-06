@@ -107,7 +107,7 @@ echo -en "Is this a test Nuance host [Y/N]: "
 read choice
 
 case $choice in
-  Y|y) testflag=yes -
+  Y|y) testflag=yes
      echo [`Sys_dt`] This is a test Nuance host. The test license will be restricted to 4 ports.
   ;;
   N|n) testflag=no
@@ -281,7 +281,7 @@ cmdResultTitle=`echo $cmdResult | head -n 1`
 ResultPrint "NMS"
 
 # NVE test license setting
-if [ $testflag = yes  ];then
+if [ "$testflag" = "yes"  ];then
   echo [`Sys_dt`] This is a test host, set the NVE TTS port to 4.
 cat > /var/local/Nuance/system/config/nvs_update_config.txt <<EOF
 tts_license_ports=4
@@ -306,7 +306,7 @@ cmdResultTitle=`echo $cmdResult | head -n 1`
 ResultPrint "NVE"
 
 # NRS test license setting
-if [ $testflag = yes  ];then
+if [ "$testflag" = "yes"  ];then
   echo [`Sys_dt`] This is a test host, set the NRS license to 4.
 cat > /var/local/Nuance/system/config/nrs_update_config.txt <<EOF
 swirec_license_ports=4
