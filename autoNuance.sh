@@ -21,11 +21,11 @@
 # 2017.May.25th Ver 2.2 Add a printout : echo [`Sys_dt`] Tropo is installed. Need stop it before Nuance deploy.
 # 2017.May.26th Ver 2.3 Add a check for super user running.
 # 2017.May.26th Ver 2.4 Add a memory check, must larger than 1.5G. And replan the exit error code.
-# 2017.May.31th Ver 2.5 Add a voice package rpm check
+# 2017.May.31th Ver 2.5 Add a voice package rpm check.
+# 2017.Jun.6th  Ver 2.6 Add a step to check hostname, it can't be localhost.
 # Plan:
 # 1. add a nuance license check
 # 2. add a remove t_hosts  step from mysql if assign-role.sh fail with duplicated host name
-# 3. add a step to check hostname, it can't be localhost
 
 # Exit error code
 # 0 Run this script completed.
@@ -80,6 +80,8 @@ echo [`Sys_dt`] Check the Nuance Speech Suite is installed.
 if [ ! -e /etc/init.d/nuance-wd ];then
   echo Nuance watch daemeon file is not existed. The Nuance is not installed. Exit now.
   exit 1
+  else
+    echo "/etc/init.d/nuance-wd exists. Nuance Speech Suite is installed. Continue."
 fi
 
 # NRE & NVE Voice packages must be installed. Otherwise the config will meet Fatal Error.
@@ -89,6 +91,12 @@ if [ `rpm -qa | grep -i nve | wc -l` -lt 2 ];then
 fi
 if [ `rpm -qa | grep -i nre | wc -l` -lt 2 ];then
   echo [`Sys_dt`] The NRE voice package is not installed. Pls install at least one at first. Exit now.
+  exit 1
+fi
+
+# Check the "hostname -f". Should not be localhost.
+if [ "$thishost" = "localhost" ];then
+  echo [`Sys_dt`] The \"hostname -f\" is localhost. Pls change it in /etc/hosts. Exit now.
   exit 1
 fi
 
