@@ -3,7 +3,7 @@
 # The script is used to remove Nuance TOTALLY!
 # ONLY USED FOR TEST.
 
-rpmResult=`rpm -qa | grep -E "nuance|Nuance|mstation|tomcat|NRec|NSS|NVE|mysql|MySQL" | sort`
+rpmResult=`rpm -qa | grep -E "nuance|Nuance|mstation|tomcat|NSS|NRec|nve|mysql|MySQL" | sort`
 if [ "$rpmResult" != "" ]; then
   echo There are some Nuance related rpms exists.
   echo $rpmResult
