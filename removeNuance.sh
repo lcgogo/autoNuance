@@ -5,6 +5,8 @@
 
 rpmResult=`rpm -qa | grep -E "nuance|Nuance|mstation|tomcat|NRec|NSS|NVE|mysql|MySQL" | sort`
 if [ "$rpmResult" != "" ]; then
+  echo There are some Nuance related rpms exists.
+  echo $rpmResult
   echo Please run "setup.sh -R" to remove Nuance at first. Then run this script.
   exit
 fi
