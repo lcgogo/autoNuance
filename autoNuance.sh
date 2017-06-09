@@ -23,15 +23,15 @@
 # 2017.May.26th Ver 2.4 Add a memory check, must larger than 1.5G. And replan the exit error code.
 # 2017.May.31th Ver 2.5 Add a voice package rpm check.
 # 2017.Jun.6th  Ver 2.6 Add a step to check hostname, it can't be localhost.
+# 2017.Jun.9th  Ver 2.7 Add a Nuance license check and decide the testflag by the result of checking.
 # Plan:
-# 1. add a nuance license check
-# 2. add a remove t_hosts  step from mysql if assign-role.sh fail with duplicated host name
+# 1. add a remove t_hosts  step from mysql if assign-role.sh fail with duplicated host name
 
 # Exit error code
 # 0 Run this script completed.
 # 1 Exit without any modify to file or system.
-# 2 File changes failed
-# 3 Command failed
+# 2 File changes failed.
+# 3 Command failed.
 
 
 #############
@@ -100,41 +100,73 @@ if [ "$thishost" = "localhost" ];then
   exit 1
 fi
 
+# Check the Nuance License Manager installed.
+if [ -e /etc/init.d/nuance-licmgr ];then
+  echo [`Sys_dt`] The Nuance License Manager is installed in this host.
+  else
+    echo [`Sys_dt`] The Nuance License Manager is NOT installed in this host. Exit now.
+    exit 1
+fi
+
+# Check the Nuance license file.
+nuanceLicense=`ps -ef | grep "components\/lmgrd" | awk {'print $10'}`
+if [ "$nuanceLicense" ];then
+  echo [`Sys_dt`] The Nuance license file is $nuanceLicense.
+  else
+    echo [`Sys_dt`] The Nuance License Manager is NOT running. Exit now.
+    exit 1
+fi
+
+# Is this a test license file or not.
+hostid_in_licensefile=`grep "SERVER this_host" $nuanceLicense | sort -u | awk '{print $3}'`
+if [ "$hostid_in_licensefile" = "ANY" ];then
+  echo [`Sys_dt`] This is a test Nuance license running. The test license will be restricted to 4 ports.
+  testflag=yes
+  else
+    testflag=no
+    echo [`Sys_dt`] This is NOT a test Nuance license running. Please input the ports number.
+    echo -en "Please input the NVE TTS port number: "
+    read tts_port
+    echo -en "Please input the NRS ASR port number: "
+    read asr_port
+fi
+echo [`Sys_dt`] The testflag is $testflag.
+
 ###############################################
 # Is this a test Nuance host?
-echo "Test Nuance license will be restricted to 4 ports."
-echo -en "Is this a test Nuance host [Y/N]: "
-read choice
-
-case $choice in
-  Y|y) testflag=yes
-     echo [`Sys_dt`] This is a test Nuance host. The test license will be restricted to 4 ports.
-  ;;
-  N|n) testflag=no
-
-     echo [`Sys_dt`] This is not a test Nuance host. Input the TTS port number in license.lic
-     echo -en "Please input the NVE TTS port number: "
-     read tts_port
+#echo "Test Nuance license will be restricted to 4 ports."
+#echo -en "Is this a test Nuance host [Y/N]: "
+#read choice
+#
+#case $choice in
+#  Y|y) testflag=yes
+#     echo [`Sys_dt`] This is a test Nuance host. The test license will be restricted to 4 ports.
+#  ;;
+#  N|n) testflag=no
+#
+#     echo [`Sys_dt`] This is not a test Nuance host. Input the TTS port number in license.lic
+#     echo -en "Please input the NVE TTS port number: "
+#     read tts_port
 #       if [[ $tts_port -gt 100 ]];then
 #         echo The NVE TTS port is larger than 100. Need install Nuance in a seperated host. Exit now.
 #         exit 1
 #       fi
-
-     echo [`Sys_dt`] This is not a test Nuance host. Input the ASR port number in license.lic
-     echo -en "Please input the NRS ASR port number: "
-     read asr_port
+#
+#     echo [`Sys_dt`] This is not a test Nuance host. Input the ASR port number in license.lic
+#     echo -en "Please input the NRS ASR port number: "
+#     read asr_port
 #       if [[ $asr_port -gt 100 ]];then
 #         echo The NRS ASR port is larger than 100. Need install Nuance in a seperated host. Exit now.
 #         exit 1
 #       fi
+#
+#  ;;
+#  *) echo [`Sys_dt`] Invalid input. Please input Y or N. Your input is $choice. Exit now.
+#    exit 1
+#  ;;
+#esac
 
-  ;;
-  *) echo [`Sys_dt`] Invalid input. Please input Y or N. Your input is $choice. Exit now.
-    exit 1
-  ;;
-esac
-
-echo [`Sys_dt`] The testflag is $testflag.
+#echo [`Sys_dt`] The testflag is $testflag.
 
 ################################################
 # function ServiceStop
