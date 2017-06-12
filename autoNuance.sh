@@ -24,6 +24,7 @@
 # 2017.May.31th Ver 2.5 Add a voice package rpm check.
 # 2017.Jun.6th  Ver 2.6 Add a step to check hostname, it can't be localhost.
 # 2017.Jun.9th  Ver 2.7 Add a Nuance license check and decide the testflag by the result of checking.
+# 2017.Jun.12th Ver 2.8 Change some log printout more readable.
 # Plan:
 # 1. add a remove t_hosts  step from mysql if assign-role.sh fail with duplicated host name
 
@@ -62,23 +63,23 @@ echo `date +%Y-%m-%d-%H:%M:%S`
 
 # Are you a super user?
 if [ "`id -u`" != "0" ]; then
-  echo [`Sys_dt`] You must be a superuser to run this script. Exit now.
+  echo [`Sys_dt`] "You must be a superuser to run this script. Exit now. Pls fix it and rerun this script."
   exit 1
   else
-    echo [`Sys_dt`] Running as superuser.
+    echo [`Sys_dt`] "Running as superuser."
 fi
 
 # Memory must be larger than 1.5G, otherwise NMS can't stop/start
 if [ `free -m | grep Mem | awk '{print $2}'` -lt 1500  ]; then
   echo [`Sys_dt`] "The NMS can't stop/start at this host because the memory is less than 1.5G." 
-  echo [`Sys_dt`] "Pls increase memory larger than 1.5GB and run this script again. Exit now."
+  echo [`Sys_dt`] "Pls increase memory larger than 1.5GB. Exit now. Pls fix it and rerun this script."
   exit 1
 fi
 
 # Check whether Nuance Speech Suite is installed
 echo [`Sys_dt`] Check the Nuance Speech Suite is installed.
 if [ ! -e /etc/init.d/nuance-wd ];then
-  echo Nuance watch daemeon file is not existed. The Nuance is not installed. Exit now.
+  echo Nuance watch daemeon file is not existed. The Nuance is not installed. Exit now. Pls fix it and rerun this script.
   exit 1
   else
     echo "/etc/init.d/nuance-wd exists. Nuance Speech Suite is installed. Continue."
@@ -86,17 +87,17 @@ fi
 
 # NRE & NVE Voice packages must be installed. Otherwise the config will meet Fatal Error.
 if [ `rpm -qa | grep -i nve | wc -l` -lt 2 ];then
-  echo [`Sys_dt`] The NVE voice package is not installed. Pls install at least one at first. Exit now.
+  echo [`Sys_dt`] The NVE voice package is not installed. Pls install at least one at first. Exit now. Pls fix it and rerun this script.
   exit 1
 fi
 if [ `rpm -qa | grep -i nre | wc -l` -lt 2 ];then
-  echo [`Sys_dt`] The NRE voice package is not installed. Pls install at least one at first. Exit now.
+  echo [`Sys_dt`] The NRE voice package is not installed. Pls install at least one at first. Exit now. Pls fix it and rerun this script.
   exit 1
 fi
 
 # Check the "hostname -f". Should not be localhost.
 if [ "$thishost" = "localhost" ];then
-  echo [`Sys_dt`] The \"hostname -f\" is localhost. Pls change it in /etc/hosts. Exit now.
+  echo [`Sys_dt`] The \"hostname -f\" is localhost. Pls change it in /etc/hosts. Exit now. Pls fix it and rerun this script.
   exit 1
 fi
 
@@ -104,7 +105,7 @@ fi
 if [ -e /etc/init.d/nuance-licmgr ];then
   echo [`Sys_dt`] The Nuance License Manager is installed in this host.
   else
-    echo [`Sys_dt`] The Nuance License Manager is NOT installed in this host. Exit now.
+    echo [`Sys_dt`] The Nuance License Manager is NOT installed in this host. Exit now. Pls fix it and rerun this script.
     exit 1
 fi
 
@@ -113,7 +114,7 @@ nuanceLicense=`ps -ef | grep "components\/lmgrd" | awk {'print $10'}`
 if [ "$nuanceLicense" ];then
   echo [`Sys_dt`] The Nuance license file is $nuanceLicense.
   else
-    echo [`Sys_dt`] The Nuance License Manager is NOT running. Exit now.
+    echo [`Sys_dt`] The Nuance License Manager is NOT running. Exit now. Pls fix it and rerun this script.
     exit 1
 fi
 
@@ -172,15 +173,15 @@ echo [`Sys_dt`] The testflag is $testflag.
 # function ServiceStop
 function ServiceStop(){
 serviceName=$1 # the service name  which under folder /etc/init.d
-serviceCheckName=$2 # the service process keyword of "ps -ef" result. use it to check whether it's stopped or not
+serviceKeyword=$2 # the service process keyword of "ps -ef" result. use it to check whether it's stopped or not
 
 service $serviceName stop
 
-serviceStopResult=`ps -ef | grep -w $serviceCheckName | grep -v grep | wc -l` # the value should be 0 if the service is stopped.
+serviceStopResult=`ps -ef | grep -w $serviceKeyword | grep -v grep | wc -l` # the value should be 0 if the service is stopped.
 # echo serviceStopResult = $serviceStopResult
 
 if [ $serviceStopResult -ne 0 ];then
-  echo [`Sys_dt`] $serviceName is not stopped. Manual check by "ps -ef | grep -w $serviceCheckName" and stop it by kill.
+  echo [`Sys_dt`] $serviceName is not stopped. Manual check by "ps -ef | grep -w $serviceKeyword" and stop it by kill.
 fi
 }
 
@@ -192,8 +193,8 @@ fi
 # $4 is the string you want to replace to
 function ReplaceSpecialString(){
 if [ ! -f $1 ];then
-  echo [`Sys_dt`] $1 does not exist. Pls check Nuance is installed correctly. Exit now.
-  exit 2
+  echo [`Sys_dt`] $1 does not exist. Pls check Nuance is installed correctly. Exit now. Pls fix it and rerun this script.
+  exit 1
 fi
 #backup
 cp $1 $1.`Sys_dt`
@@ -248,7 +249,7 @@ case $? in
   1) tropoIsInstalled=no
      echo [`Sys_dt`] Tropo is not installed. Continue deploy Nuance.
   ;;
-  *) echo [`Sys_dt`] Unknown result of \"which tropo_services\". Exit now.
+  *) echo [`Sys_dt`] Unknown result of \"which tropo_services\". Exit now. Pls fix it and rerun this script.
      exit 1
   ;;
 esac
@@ -404,7 +405,7 @@ if [[ $tropoIsInstalled = yes && $tropoIsStop = yes && $nuancePort -ne 8080 ]];t
 fi
 
 ##############################################################
-# Complete
+# Complete, print the result as green
 echo -e [`Sys_dt`] "\033[32;49;1m The Nuance Speech Suite is configured and deployed in this host. \033[39;49;0m"
 
 exit 0
