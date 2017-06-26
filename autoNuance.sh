@@ -188,7 +188,7 @@ fi
 #################################################
 # function ReplaceSpecialString
 # $1 is the full path file name
-# $2 is the keyword of the line whhich contains the string you want to replace
+# $2 is the keyword of the line which contains the string you want to replace
 # $3 is the string you want to replace from
 # $4 is the string you want to replace to
 function ReplaceSpecialString(){
