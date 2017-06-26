@@ -58,8 +58,19 @@ echo '*** Getting license data...'
 mkdir $NAME/license
 scp $TARGET_HOST:/var/local/Nuance/system/diagnosticLogs/lm.log \
   $NAME/license/$TARGET_HOST-lm.log 2>/dev/null;
-scp $TARGET_HOST:/usr/local/Nuance/license_manager/license/license.lic \
+
+nuanceLicense=`ps -ef | grep "components\/lmgrd" | awk {'print $10'}`
+
+if [ "$nuanceLicense" ];then
+  echo The Nuance license file is $nuanceLicense.
+scp $TARGET_HOST:$nuanceLicense \
   $NAME/license/$TARGET_HOST-license.lic 2>/dev/null;
+  else
+    echo The Nuance License Manager is NOT running. Exit now. Pls fix it and rerun this script.
+fi
+
+#scp $TARGET_HOST:/usr/local/Nuance/license_manager/license/license.lic \
+#  $NAME/license/$TARGET_HOST-license.lic 2>/dev/null;
 
 #for lmhost in nuance-mgr{3,4}; do
 #  scp $lmhost.prod.wdc.sl.tropo.com:/var/local/Nuance/system/diagnosticLogs/lm.log \
