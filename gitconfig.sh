@@ -21,4 +21,10 @@ sedString="$lineNum""s/""$3""/""$4""/g"
 sed -i "$sedString" $1
 }
 
-ReplaceSpecialString ".git/config" "url" "github.com" "lcgogo@github.com" 
+url=`grep "lcgogo@github.com" .git/config`
+if [ "$url" ];then
+  echo This git folder is configed for lcgogo.
+  exit
+  else
+    ReplaceSpecialString ".git/config" "url" "github.com" "lcgogo@github.com" 
+fi
