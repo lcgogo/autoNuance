@@ -87,11 +87,17 @@ fi
 
 # NRE & NVE Voice packages must be installed. Otherwise the config will meet Fatal Error.
 if [ `rpm -qa | grep -i nve | wc -l` -lt 2 ];then
-  echo [`Sys_dt`] The NVE voice package is not installed. Pls install at least one at first. Exit now. Pls fix it and rerun this script.
+  echo [`Sys_dt`] The NVE voice package is not installed. Pls install at least one at first.
+  echo "rpm -qa | grep -i nve"
+  rpm -qa | grep -i nve
+  echo [`Sys_dt`] Pls check the above log and install one NVE voice package. After fix the issue, rerun this script. Exit now.
   exit 1
 fi
 if [ `rpm -qa | grep -i nre | wc -l` -lt 2 ];then
-  echo [`Sys_dt`] The NRE voice package is not installed. Pls install at least one at first. Exit now. Pls fix it and rerun this script.
+  echo [`Sys_dt`] The NRE voice package is not installed. Pls install at least one at first.
+  echo "rpm -qa | grep -i nre"
+  rpm -qa | grep -i nre
+  echo [`Sys_dt`] Pls check the above log and install one NRE voice package. After fix the issue, rerun this script. Exit now.
   exit 1
 fi
 
