@@ -28,3 +28,5 @@ if [ "$url" ];then
   else
     ReplaceSpecialString ".git/config" "url" "github.com" "lcgogo@github.com" 
 fi
+
+unset SSH_ASKPASS
