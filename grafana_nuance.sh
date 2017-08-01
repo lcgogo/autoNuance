@@ -4,7 +4,7 @@
 ntpdate 10.75.187.203
 yum -y install libcurl libcurl-devel rrdtool rrdtool-devel rrdtool-prel libgcrypt-devel gcc make automake gcc-c++ kernel-devel perl-devel perl-CPAN
 wget http://collectd.org/files/collectd-5.5.0.tar.gz
-tar zxvf collectd-5.5.0.tar.gz
+tar -zxvf collectd-5.5.0.tar.gz
 cd collectd-5.5.0
 ./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib --mandir=/usr/share/man --enable-all-plugins
 make
@@ -15,7 +15,7 @@ scp root@10.75.187.197:/etc/collectd.conf /etc/
 # Start the colectd  daemon
 # Copy the default init.d script
  
-cp /root/collectd-5.5.0/contrib/redhat/init.d-collectd /etc/init.d/collectd
+cp ./collectd-5.5.0/contrib/redhat/init.d-collectd /etc/init.d/collectd
  
 # Set the correct permissions
  
@@ -27,7 +27,7 @@ chkconfig collectd on
  
 # Start the deamon
  
-service collect
+service collectd start
 
 
 # Part 2. Set up Metricbeat for process cpu usage
