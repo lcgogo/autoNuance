@@ -1,6 +1,8 @@
 git config --global user.name "lcgogo"
 git config --global user.email "lcgogo123@163.com"
 
+unset SSH_ASKPASS
+
 #################################################
 # function ReplaceSpecialString
 # $1 is the full path file name
@@ -29,4 +31,3 @@ if [ "$url" ];then
     ReplaceSpecialString ".git/config" "url" "github.com" "lcgogo@github.com" 
 fi
 
-unset SSH_ASKPASS
