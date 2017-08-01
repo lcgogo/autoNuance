@@ -36,6 +36,7 @@ sudo rpm -vi metricbeat-5.4.3-x86_64.rpm
 
 mkdir /etc/metricbeat/
 scp root@10.75.187.197:/etc/metricbeat/metricbeat.yml /etc/metricbeat/
+sed -i "s/tropo-197.cisco.com/`hostname`/g" /etc/metricbeat/metricbeat.yml
 
 sudo /etc/init.d/metricbeat start
 sudo chkconfig --add metricbeat
