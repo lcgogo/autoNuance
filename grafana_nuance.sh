@@ -18,7 +18,7 @@ scp root@10.75.187.197:/etc/collectd.conf /etc/
 # Start the colectd  daemon
 # Copy the default init.d script
  
-cp $thisfolder/collectd-5.5.0/contrib/redhat/init.d-collectd /etc/init.d/collectd
+cp /root/autoNuance/collectd-5.5.0/contrib/redhat/init.d-collectd /etc/init.d/collectd
  
 # Set the correct permissions
  
