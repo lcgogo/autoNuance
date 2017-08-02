@@ -1,7 +1,14 @@
-git config --global user.name "lcgogo"
-git config --global user.email "lcgogo123@163.com"
+# This script is used to config your github account in current folder
 
-unset SSH_ASKPASS
+yourname="lcgogo"
+youremail="lcgogo123@163.com"
+yourgithub="$yourname"@github.com
+
+git config --global user.name $yourname
+git config --global user.email $youremail
+
+echo "unset SSH_ASKPASS" >> ~/.bashrc
+source ~/.bashrc
 
 #################################################
 # function ReplaceSpecialString
@@ -11,7 +18,7 @@ unset SSH_ASKPASS
 # $4 is the string you want to replace to
 function ReplaceSpecialString(){
 if [ ! -f $1 ];then
-  echo $1 does not exist. Pls check Nuance is installed correctly. Exit now.
+  echo $1 does not exist. Exit now.
   exit 1
 fi
 
@@ -23,11 +30,15 @@ sedString="$lineNum""s/""$3""/""$4""/g"
 sed -i "$sedString" $1
 }
 
-url=`grep "lcgogo@github.com" .git/config`
+# Add $yourname to the url in ./.git/config
+
+url=`grep "$yourgithub" ./.git/config`
 if [ "$url" ];then
-  echo This git folder is configed for lcgogo.
-  exit
+  echo This git folder is configured for $yourname.
   else
-    ReplaceSpecialString ".git/config" "url" "github.com" "lcgogo@github.com" 
+    ReplaceSpecialString "./.git/config" "url" "github.com" "$yourgithub" 
 fi
 
+echo If you met gnome-ssh-askpass issue when \"git push\", exit and relogin this server.
+
+exit
