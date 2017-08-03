@@ -4,6 +4,7 @@ thisfile=$0
 thisfolder=${thisfile%/*}
 
 # Part 1. Set up collectd
+service ntpd stop
 ntpdate 10.75.187.203
 yum -y install libcurl libcurl-devel rrdtool rrdtool-devel rrdtool-prel libgcrypt-devel gcc make automake gcc-c++ kernel-devel perl-devel perl-CPAN
 wget http://collectd.org/files/collectd-5.5.0.tar.gz
